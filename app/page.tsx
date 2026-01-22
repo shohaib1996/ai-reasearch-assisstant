@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Brain, Sparkles, Zap, Shield } from "lucide-react";
 import ResearchForm from "@/components/research-form";
 import ResearchResult from "@/components/research-result";
@@ -9,6 +10,17 @@ import { useResearchStore } from "@/store/research-store";
 
 export default function Home() {
   const { isLoading, result, error } = useResearchStore();
+  const resultSectionRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to result section when loading starts or result arrives
+  useEffect(() => {
+    if (isLoading || result) {
+      resultSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  }, [isLoading, result]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -58,28 +70,31 @@ export default function Home() {
         <ResearchForm />
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="mb-8 p-4 rounded-lg bg-destructive/10 text-destructive text-center">
-          {error}
-        </div>
-      )}
+      {/* Result Section - scroll target */}
+      <div ref={resultSectionRef} className="scroll-mt-4">
+        {/* Error Message */}
+        {error && (
+          <div className="mb-8 p-4 rounded-lg bg-destructive/10 text-destructive text-center">
+            {error}
+          </div>
+        )}
 
-      {/* Loading State with Progress */}
-      {isLoading && (
-        <Card className="mb-8">
-          <CardContent className="pt-6">
-            <ResearchProgress isActive={isLoading} />
-          </CardContent>
-        </Card>
-      )}
+        {/* Loading State with Progress */}
+        {isLoading && (
+          <Card className="mb-8">
+            <CardContent className="pt-6">
+              <ResearchProgress isActive={isLoading} />
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Results */}
-      {result && !isLoading && (
-        <div className="mb-8">
-          <ResearchResult result={result} />
-        </div>
-      )}
+        {/* Results */}
+        {result && !isLoading && (
+          <div className="mb-8">
+            <ResearchResult result={result} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
